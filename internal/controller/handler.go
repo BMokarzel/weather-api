@@ -32,3 +32,7 @@ func (h *Handler) GetWeather(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(code)
 	w.Write(body)
 }
+
+func (h *Handler) Health(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}

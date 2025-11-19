@@ -42,6 +42,7 @@ func main() {
 
 	a.Router.Route("/", func(r chi.Router) {
 		r.Get("/", a.Handler.GetWeather)
+		r.Get("/health", a.Handler.Health)
 	})
 
 	http.ListenAndServe(":8080", a.Router)
