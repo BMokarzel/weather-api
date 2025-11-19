@@ -44,7 +44,7 @@ func LoadConfigs() (*config, error) {
 		return nil, err
 	}
 
-	cfg.ViaCepUrl = "https://viacep.com.br"
+	cfg.ViaCepUrl = "https://viacep.com.br/ws"
 	cfg.WeatherApiKey = "34e6f3d1ecb74dd1941193145251811"
 	cfg.WeatherApiUrl = "https://www.weatherapi.com"
 

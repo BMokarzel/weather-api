@@ -25,14 +25,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	service := service.New(&viacep.ViaCep{
-		URL: cfg.ViaCepUrl,
-	},
-		&weatherapi.WeatherApi{
-			URL: cfg.WeatherApiUrl,
-			Key: cfg.WeatherApiKey,
-		})
+	viaCep := viacep.New(cfg.ViaCepUrl)
+
+	weatherApi := weatherapi.New(cfg.WeatherApiUrl, cfg.WeatherApiKey)
+
+	service := service.New(viaCep, weatherApi)
+
 	handler := controller.New(service)
+
 	router := chi.NewRouter()
 
 	a := Api{

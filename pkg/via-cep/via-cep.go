@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -15,18 +16,33 @@ type ViaCepOutput struct {
 	Location string `json:"localidade"`
 }
 
+func New(url string) *ViaCep {
+	return &ViaCep{
+		URL: url,
+	}
+}
+
 func (v *ViaCep) GetLocation(ctx context.Context, cep string) (ViaCepOutput, error) {
 
 	url := fmt.Sprintf("%s/%s/json/", v.URL, cep)
 
-	res, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		return ViaCepOutput{}, err
 	}
 
-	if res.Response.StatusCode > 299 {
+	log.Println("[DEBUG] Request: ", req)
 
-		return ViaCepOutput{}, nil
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return ViaCepOutput{}, err
+	}
+
+	if res.StatusCode > 299 {
+
+		log.Println("[DEBUG] Response: ", res)
+
+		return ViaCepOutput{}, fmt.Errorf("")
 
 	} else {
 
@@ -36,6 +52,8 @@ func (v *ViaCep) GetLocation(ctx context.Context, cep string) (ViaCepOutput, err
 		if err != nil {
 			return ViaCepOutput{}, err
 		}
+
+		log.Println("[DEBUG] Response: ", res)
 
 		return response, nil
 	}

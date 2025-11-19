@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/BMokarzel/weather-api/internal/service"
-	"github.com/go-chi/chi/v5"
 )
 
 type Handler struct {
@@ -20,7 +19,7 @@ func New(service *service.Service) *Handler {
 
 func (h *Handler) GetWeather(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	zipCode := chi.URLParam(r, "zipCode")
+	zipCode := r.URL.Query().Get("zipCode")
 
 	res, code := h.Service.GetWeather(ctx, zipCode)
 

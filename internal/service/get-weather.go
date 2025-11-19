@@ -19,7 +19,7 @@ func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, 
 	regex := regexp.MustCompile(`^\d{5}-?\d{3}$`)
 
 	if !regex.MatchString(zipCode) {
-		log.Print("Error to parse zipCode. Invalid format.")
+		log.Printf("Error to parse zipCode. Invalid format.")
 		return controller_dto.ErrorOutput{
 			Message: "invalid zipcode",
 		}, 422
@@ -27,7 +27,7 @@ func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, 
 
 	viaCepRes, err := s.ViaCep.GetLocation(ctx, zipCode)
 	if err != nil {
-		log.Print("Error to get location")
+		log.Printf("Error to get location. Error: %s", err)
 		return controller_dto.ErrorOutput{
 			Message: "invalid zipcode",
 		}, 422
@@ -35,7 +35,7 @@ func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, 
 
 	watherRes, err := s.WeatherApi.GetWeather(ctx, viaCepRes.Location)
 	if err != nil {
-		log.Print("Error to get weather.")
+		log.Printf("Error to get weather. Error: %s", err)
 		return controller_dto.ErrorOutput{
 			Message: "problem to get real time weather. If the problem persists, contact support",
 		}, 422
