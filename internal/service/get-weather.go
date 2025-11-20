@@ -41,12 +41,12 @@ func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, 
 		}, 422
 	}
 
-	tempF := watherRes.Weather.CelsiusTemp*1.8 + 32
+	tempF := watherRes.Current.TempC*1.8 + 32
 
-	tempK := watherRes.Weather.CelsiusTemp + 273
+	tempK := watherRes.Current.TempC + 273
 
 	response := controller_dto.GetWeatherOutput{
-		TempC: watherRes.Weather.CelsiusTemp,
+		TempC: watherRes.Current.TempC,
 		TempF: tempF,
 		TempK: tempK,
 	}

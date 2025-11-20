@@ -3,7 +3,6 @@ package weatherapi
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -17,7 +16,11 @@ type WeatherApi struct {
 
 type GetWeatherOutput struct {
 	Location Location
-	Weather  CurrentWeather
+	Current  Current `json:"current"`
+}
+
+type Current struct {
+	TempC float64 `json:"temp_c"`
 }
 
 type Location struct {
@@ -40,9 +43,7 @@ func New(url, key string) *WeatherApi {
 
 func (k *WeatherApi) GetWeather(ctx context.Context, location string) (GetWeatherOutput, error) {
 
-	url := fmt.Sprintf("%s/v1/current.json", k.URL)
-
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, k.URL, nil)
 	if err != nil {
 		return GetWeatherOutput{}, err
 	}
@@ -60,7 +61,7 @@ func (k *WeatherApi) GetWeather(ctx context.Context, location string) (GetWeathe
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode == 422 {
+	if res.StatusCode == 404 {
 		log.Println("[DEBUG] Response: ", res)
 
 		return GetWeatherOutput{}, pkg_errors.NewNotFoundError()

@@ -1,0 +1,18 @@
+# Configurando as variaveis
+
+Na pasta raiz do projeto você encontrará o arquivo .env, que contem as 3 variaveis de ambiente necessárias para o software funcionar. Estou deixando minhas credenciais do weather-api para que os testes sejam realizados, entretando, dentro de alguns dias a credencial poderá vencer. Você pode substituir a chave do arquivo .env por uma chave própria sua.
+
+# Instruções para teste
+
+Dentro da pasta test você encontrará um segundo arquivo .env, que contem uma variavel adjacente chamada "ZIPCODE". O valor atribuido a essa variavel será aquele que a função irá utilizar no teste. Você pode atribuir novos valores caso desejar.
+Para rodar o teste basta utilizar o comando abaixo quando você estiver dentro da pasta raiz do projeto.
+
+go test ./test/...
+
+O teste irá simular perfeitamente o comportamente do software, realizando as requisições para as apis ViaCep e WeatherApi.
+
+# Software em produção
+
+Você pode testar o software no link abaixo. Mude o valor de "zipCode=" para testar novos ceps.
+
+https://weatherapi-222944460079.us-central1.run.app/?zipCode=13015082
