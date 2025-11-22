@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	errors "github.com/BMokarzel/weather-api/pkg/errors"
 )
 
 type ViaCep struct {
@@ -38,23 +40,25 @@ func (v *ViaCep) GetLocation(ctx context.Context, cep string) (ViaCepOutput, err
 		return ViaCepOutput{}, err
 	}
 
-	if res.StatusCode > 299 {
+	log.Println("[DEBUG] Response: ", res)
 
-		log.Println("[DEBUG] Response: ", res)
-
-		return ViaCepOutput{}, fmt.Errorf("")
-
-	} else {
-
+	switch {
+	case res.StatusCode < 300:
 		var response ViaCepOutput
 
 		err = json.NewDecoder(res.Body).Decode(&response)
 		if err != nil {
 			return ViaCepOutput{}, err
 		}
-
-		log.Println("[DEBUG] Response: ", res)
-
 		return response, nil
+	case res.StatusCode == 400:
+		return ViaCepOutput{}, errors.NewBadRequestError()
+	case res.StatusCode == 404:
+		return ViaCepOutput{}, errors.NewNotFoundError()
+	case res.StatusCode == 422:
+		return ViaCepOutput{}, errors.NewUnprocessableEntityError()
+	default:
+		return ViaCepOutput{}, errors.NewInternalServerError()
 	}
+
 }

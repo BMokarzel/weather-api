@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	pkg_errors "github.com/BMokarzel/weather-api/pkg/errors"
+	errors "github.com/BMokarzel/weather-api/pkg/errors"
 )
 
 type WeatherApi struct {
@@ -61,27 +61,25 @@ func (k *WeatherApi) GetWeather(ctx context.Context, location string) (GetWeathe
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode == 404 {
-		log.Println("[DEBUG] Response: ", res)
+	log.Println("[DEBUG] Response: ", res)
 
-		return GetWeatherOutput{}, pkg_errors.NewNotFoundError()
-
-	} else if res.StatusCode > 299 && res.StatusCode != 404 {
-		log.Println("[DEBUG] Response: ", res)
-
-		return GetWeatherOutput{}, pkg_errors.NewNotFoundError()
-	} else {
-		log.Println("[DEBUG] Response: ", res)
-
+	switch {
+	case res.StatusCode < 300:
 		var response GetWeatherOutput
 
 		err = json.NewDecoder(res.Body).Decode(&response)
 		if err != nil {
 			return GetWeatherOutput{}, err
-
 		}
-
 		return response, nil
+	case res.StatusCode == 400:
+		return GetWeatherOutput{}, errors.NewBadRequestError()
+	case res.StatusCode == 404:
+		return GetWeatherOutput{}, errors.NewNotFoundError()
+	case res.StatusCode == 422:
+		return GetWeatherOutput{}, errors.NewUnprocessableEntityError()
+	default:
+		return GetWeatherOutput{}, errors.NewInternalServerError()
 	}
 
 }

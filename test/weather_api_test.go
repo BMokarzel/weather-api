@@ -11,6 +11,7 @@ import (
 	"github.com/BMokarzel/weather-api/internal/controller"
 	controller_dto "github.com/BMokarzel/weather-api/internal/controller/dto"
 	"github.com/BMokarzel/weather-api/internal/service"
+	http_error "github.com/BMokarzel/weather-api/pkg/http"
 	viacep "github.com/BMokarzel/weather-api/pkg/via-cep"
 	weatherapi "github.com/BMokarzel/weather-api/pkg/weather-api"
 	"github.com/stretchr/testify/assert"
@@ -18,8 +19,10 @@ import (
 )
 
 const (
-	NotFound = "can not found zipcode"
-	Invalid  = "invalid zipcode"
+	BadRequest          = "bad request"
+	NotFound            = "can not found zipcode"
+	Invalid             = "invalid zipcode"
+	InternalServerError = "internal server error"
 )
 
 func TestWeatherApi(t *testing.T) {
@@ -43,33 +46,40 @@ func TestWeatherApi(t *testing.T) {
 	regex := regexp.MustCompile(`^\d{5}-?\d{3}$`)
 
 	if !regex.MatchString(cfg.ZipCode) {
-		var output controller_dto.ErrorOutput
+		var output http_error.ErrorResponse
 		err := json.NewDecoder(rec.Body).Decode(&output)
 		require.NoError(t, err)
 
-		assert.Equal(t, Invalid, output.Message)
+		assert.Equal(t, Invalid, output.Error)
 		return
 	}
 
+	var output controller_dto.GetWeatherOutput
+	var outputError http_error.ErrorResponse
+
 	switch rec.Code {
 	case http.StatusOK:
-		var output controller_dto.GetWeatherOutput
 		err := json.NewDecoder(rec.Body).Decode(&output)
 		require.NoError(t, err)
 
 		assert.NotEmpty(t, output)
+	case http.StatusBadRequest:
+		err := json.NewDecoder(rec.Body).Decode(&outputError)
+		require.NoError(t, err)
+
+		assert.Equal(t, BadRequest, outputError.Error)
 	case http.StatusNotFound:
-		var output controller_dto.ErrorOutput
-		err := json.NewDecoder(rec.Body).Decode(&output)
+		err := json.NewDecoder(rec.Body).Decode(&outputError)
 		require.NoError(t, err)
 
-		assert.Equal(t, NotFound, output.Message)
+		assert.Equal(t, NotFound, outputError.Error)
 	case http.StatusUnprocessableEntity:
-		var output controller_dto.ErrorOutput
 		err := json.NewDecoder(rec.Body).Decode(&output)
 		require.NoError(t, err)
 
-		assert.Equal(t, Invalid, output.Message)
+		assert.Equal(t, InternalServerError, outputError.Error)
+	case http.StatusInternalServerError:
+
 	default:
 		t.Fatalf("Unexpected status %d. Body: %s", rec.Code, rec.Body.String())
 	}

@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/BMokarzel/weather-api/internal/service"
+	errors "github.com/BMokarzel/weather-api/pkg/errors"
+	http_error "github.com/BMokarzel/weather-api/pkg/http"
 )
 
 type Handler struct {
@@ -21,15 +23,19 @@ func (h *Handler) GetWeather(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	zipCode := r.URL.Query().Get("zipCode")
 
-	res, code := h.Service.GetWeather(ctx, zipCode)
-
-	body, err := json.Marshal(res)
+	res, err := h.Service.GetWeather(ctx, zipCode)
 	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
+		http_error.ErrorHandler(w, r, err)
 		return
 	}
 
-	w.WriteHeader(code)
+	body, err := json.Marshal(res)
+	if err != nil {
+		http_error.ErrorHandler(w, r, errors.NewInternalServerError())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 	w.Write(body)
 }
 

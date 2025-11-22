@@ -6,39 +6,27 @@ import (
 	"regexp"
 
 	controller_dto "github.com/BMokarzel/weather-api/internal/controller/dto"
+	errors "github.com/BMokarzel/weather-api/pkg/errors"
 )
 
-func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, int) {
-
-	if zipCode == "" {
-		return controller_dto.ErrorOutput{
-			Message: "can not find zipcode",
-		}, 404
-	}
-
+func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, error) {
 	regex := regexp.MustCompile(`^\d{5}-?\d{3}$`)
 
 	if !regex.MatchString(zipCode) {
 		log.Printf("Error to parse zipCode. Invalid format.")
-		return controller_dto.ErrorOutput{
-			Message: "invalid zipcode",
-		}, 422
+		return controller_dto.GetWeatherOutput{}, errors.NewUnprocessableEntityError()
 	}
 
 	viaCepRes, err := s.ViaCep.GetLocation(ctx, zipCode)
 	if err != nil {
 		log.Printf("Error to get location. Error: %s", err)
-		return controller_dto.ErrorOutput{
-			Message: "invalid zipcode",
-		}, 422
+		return controller_dto.GetWeatherOutput{}, err
 	}
 
 	watherRes, err := s.WeatherApi.GetWeather(ctx, viaCepRes.Location)
 	if err != nil {
 		log.Printf("Error to get weather. Error: %s", err)
-		return controller_dto.ErrorOutput{
-			Message: "problem to get real time weather. If the problem persists, contact support",
-		}, 422
+		return controller_dto.GetWeatherOutput{}, err
 	}
 
 	tempF := watherRes.Current.TempC*1.8 + 32
@@ -51,5 +39,5 @@ func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, 
 		TempK: tempK,
 	}
 
-	return response, 200
+	return response, nil
 }

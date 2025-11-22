@@ -14,7 +14,7 @@ type NotFount struct {
 }
 
 func (e *NotFount) Error() string {
-	return "Not found"
+	return "can not find zipcode"
 }
 
 func NewNotFoundError() *NotFount {
@@ -23,5 +23,53 @@ func NewNotFoundError() *NotFount {
 
 func IsNotFound(e error) bool {
 	_, ok := e.(*NotFount)
+	return ok
+}
+
+type UnprocessableEntityError struct {
+}
+
+func (e *UnprocessableEntityError) Error() string {
+	return "invalid zipcode"
+}
+
+func NewUnprocessableEntityError() *UnprocessableEntityError {
+	return &UnprocessableEntityError{}
+}
+
+func IsUnprocessableEntityError(e error) bool {
+	_, ok := e.(*UnprocessableEntityError)
+	return ok
+}
+
+type BadRequestError struct {
+}
+
+func (e *BadRequestError) Error() string {
+	return "bad request"
+}
+
+func NewBadRequestError() *BadRequestError {
+	return &BadRequestError{}
+}
+
+func IsBadRequestError(e error) bool {
+	_, ok := e.(*BadRequestError)
+	return ok
+}
+
+type InternalServerError struct {
+}
+
+func (e *InternalServerError) Error() string {
+	return "internal server error"
+}
+
+func NewInternalServerError() *InternalServerError {
+	return &InternalServerError{}
+}
+
+func IsInternalServerError(e error) bool {
+	_, ok := e.(*InternalServerError)
 	return ok
 }
