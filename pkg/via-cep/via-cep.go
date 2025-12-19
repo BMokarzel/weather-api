@@ -16,6 +16,7 @@ type ViaCep struct {
 
 type ViaCepOutput struct {
 	Location string `json:"localidade"`
+	Error    string `json:"erro"`
 }
 
 func New(url string) *ViaCep {
@@ -25,7 +26,6 @@ func New(url string) *ViaCep {
 }
 
 func (v *ViaCep) GetLocation(ctx context.Context, cep string) (ViaCepOutput, error) {
-
 	url := fmt.Sprintf("%s/%s/json/", v.URL, cep)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
@@ -33,23 +33,26 @@ func (v *ViaCep) GetLocation(ctx context.Context, cep string) (ViaCepOutput, err
 		return ViaCepOutput{}, err
 	}
 
-	log.Println("[DEBUG] Request: ", req)
+	log.Println("[DEBUG] Request: %v", req)
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return ViaCepOutput{}, err
 	}
 
-	log.Println("[DEBUG] Response: ", res)
+	log.Println("[DEBUG] Response: %v", res)
+
+	var response ViaCepOutput
+
+	err = json.NewDecoder(res.Body).Decode(&response)
+	if err != nil {
+		return ViaCepOutput{}, err
+	}
 
 	switch {
-	case res.StatusCode < 300:
-		var response ViaCepOutput
-
-		err = json.NewDecoder(res.Body).Decode(&response)
-		if err != nil {
-			return ViaCepOutput{}, err
-		}
+	case response.Error != "":
+		return ViaCepOutput{}, errors.NewBadRequestError()
+	case res.StatusCode > 199 && res.StatusCode < 300:
 		return response, nil
 	case res.StatusCode == 400:
 		return ViaCepOutput{}, errors.NewBadRequestError()
@@ -60,5 +63,4 @@ func (v *ViaCep) GetLocation(ctx context.Context, cep string) (ViaCepOutput, err
 	default:
 		return ViaCepOutput{}, errors.NewInternalServerError()
 	}
-
 }

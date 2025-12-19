@@ -20,7 +20,7 @@ func (s *Service) GetWeather(ctx context.Context, zipCode string) (interface{}, 
 	viaCepRes, err := s.ViaCep.GetLocation(ctx, zipCode)
 	if err != nil {
 		log.Printf("Error to get location. Error: %s", err)
-		return controller_dto.GetWeatherOutput{}, err
+		return controller_dto.GetWeatherOutput{}, errors.NewNotFoundError()
 	}
 
 	watherRes, err := s.WeatherApi.GetWeather(ctx, viaCepRes.Location)
