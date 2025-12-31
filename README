@@ -16,3 +16,7 @@ O teste irá simular perfeitamente o comportamente do software, realizando as re
 Você pode testar o software no link abaixo. Mude o valor de "zipCode=" para testar novos ceps.
 
 https://weatherapi-222944460079.us-central1.run.app/?zipCode=13015082
+
+Conforme solicidado pelo avaliador, a correção do erro especifico foi realizada, como pode ser comprovada pela url abaixo:
+
+https://weatherapi-222944460079.us-central1.run.app/?zipCode=11111111
